@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberbullying Detection System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f6fa;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        h1 {
+            background-color: #1d3557;
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 80%;
+            height: 120px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #457b9d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #1d3557;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        .card {
+            background: white;
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Cyberbullying Detection System</h1>
+    <div class="card">
+        <p><strong>Enter text to analyze:</strong></p>
+        <textarea id="inputText" placeholder="Type or paste text here..."></textarea><br>
+        <button onclick="analyzeText()">Analyze</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function analyzeText() {
+            const text = document.getElementById('inputText').value.trim();
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = "Analyzing... ⏳";
+
+            if (!text) {
+                resultDiv.innerHTML = "⚠️ Please enter some text first.";
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/detect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <strong>Result:</strong> ${data.label || "Unknown"}<br>
+                        <strong>Severity:</strong> ${data.severity || "N/A"}<br>
+                        <strong>Confidence:</strong> ${(data.confidence * 100 || 0).toFixed(2)}%
+                    `;
+                } else {
+                    resultDiv.innerHTML = "❌ Error: " + (data.error || "Something went wrong");
+                }
+            } catch (err) {
+                resultDiv.innerHTML = "❌ Request failed: " + err.message;
+            }
+        }
+    </script>
+</body>
+</html>
